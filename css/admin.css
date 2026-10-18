@@ -51,6 +51,14 @@ code { background: #f0ece6; padding: 1px 6px; border-radius: 6px; font-size: 13p
 .tabs .tab-publish { background: rgba(255,79,46,.25); color: #fff; }
 .tabs .tab-publish.on { background: var(--accent); color: #fff; }
 .side-foot { display: none; }
+
+/* Telefonda barcha bo‘limlar bir vaqtda ko‘rinadi (yonga surish shart emas) */
+@media (max-width: 959px) {
+  .side { position: static; }
+  .tabs { flex-wrap: wrap; overflow: visible; margin: 12px 0 0; padding: 0; gap: 6px; }
+  .tabs button { height: 40px; padding: 0 14px; }
+  .main { padding-top: 14px; }
+}
 .save-state { font-size: 12px; color: rgba(255,255,255,.6); }
 .save-state.dirty { color: #ffb59f; }
 
