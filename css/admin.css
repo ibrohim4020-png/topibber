@@ -64,6 +64,14 @@ code { background: #f0ece6; padding: 1px 6px; border-radius: 6px; font-size: 13p
 
 .main { padding: 18px 14px 80px; max-width: 980px; }
 .banner { background: #fff4e5; color: #6b4310; border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; font-size: 14px; box-shadow: inset 0 0 0 1px #f4d4a6; }
+.savebar {
+  position: sticky; top: 8px; z-index: 9; margin-bottom: 16px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 14px; border-radius: 14px; font-size: 14px; font-weight: 600;
+  background: #e7f6ef; color: #1d6b50; box-shadow: inset 0 0 0 1px #bfe6d6;
+}
+.savebar.dirty { background: #fff4e5; color: #6b4310; box-shadow: inset 0 0 0 1px #f4d4a6, 0 8px 20px -12px rgba(0,0,0,.3); }
+.savebar .btn { flex: none; }
 .panel-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
 .card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: 0 1px 0 var(--line), 0 10px 30px -22px rgba(0,0,0,.25); margin-bottom: 14px; }
 .grid2 { display: grid; gap: 12px; }
