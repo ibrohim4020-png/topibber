@@ -17,12 +17,12 @@ window.SITE = {
 
   /* Aloqa — vaqtinchalik qiymatlar. Admin paneldan o‘zingiznikiga almashtiring. */
   contacts: {
-    phone: "+998 90 000 00 00",
-    phoneLink: "tel:+998900000000",
-    telegram: "@username",
-    telegramLink: "https://t.me/username",
-    instagram: "@username",
-    instagramLink: "https://instagram.com/username",
+    phone: "+998 90 3239770",
+    phoneLink: "tel:+998903239770",
+    telegram: "@maftuna_mannobova",
+    telegramLink: "https://t.me/maftuna_mannobova",
+    instagram: "@byafmantun",
+    instagramLink: "https://instagram.com/byafmantun",
     workHours: "Har kuni 9:00 – 21:00",
   },
 
@@ -104,7 +104,7 @@ window.SITE = {
   prohibited: {
     list: [
       "Ichida suyuqligi bor narsalar",
-      "Batareyka",
+      "Batareyka va elektron mahsulot",
       "Ichida magniti bor barcha narsalar",
       "Kukunli buyumlar",
       "Barcha parfyumeriya va kosmetika mahsulotlari",
