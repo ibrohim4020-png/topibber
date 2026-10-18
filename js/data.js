@@ -117,6 +117,7 @@ window.SITE = {
     ],
     keywords: [
       "suyuqlik", "suyuq", "жидкост", "liquid",
+      "elektron", "электрон", "electronic",
       "batareya", "batareyka", "батарейк", "батаре", "battery", "akkumulyator", "аккумулятор",
       "magnit", "магнит", "magnet",
       "kukun", "порошок", "powder",
