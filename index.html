@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TopibBer — Xitoydan buyurtma xizmati</title>
+  <meta name="description" content="Pinduoduo’dan mahsulot topish va buyurtma berish xizmati. Mustaqil xizmat: narx va muddat buyurtmadan oldin aytiladi.">
+  <meta name="theme-color" content="#e9e6e4">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="uz_UZ">
+  <meta property="og:title" content="TopibBer — Xitoydan buyurtma xizmati">
+  <meta property="og:description" content="Xitoydan yoqqan buyumingizni buyurtma qiling. Mahsulotni topib, siz uchun buyurtma beramiz.">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    /* JavaScript yoqilgan → "js" belgisi; 3D ishlay olmasa → "no-webgl" (yengil rejim). */
+    (function () {
+      var h = document.documentElement, ok = false;
+      h.className += " js";
+      try { var c = document.createElement("canvas"); ok = !!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl"))); } catch (e) {}
+      var save = navigator.connection && navigator.connection.saveData;
+      if (!ok || save || /[?&]lite\b/.test(location.search)) h.className += " no-webgl";
+    })();
+  </script>
+  <link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ff4f2e'/%3E%3Cpath d='M7 12 16 7l9 5v8l-9 5-9-5zM7 12l9 5 9-5M16 17v8' fill='none' stroke='white' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip" href="#katalog">Asosiy mazmunga o‘tish</a>
+  <noscript><p class="noscript">Sayt to‘liq ishlashi uchun brauzerda JavaScript yoqilgan bo‘lishi kerak. Buyurtma uchun to‘g‘ridan-to‘g‘ri Telegram yoki telefon orqali yozing.</p></noscript>
+
+  <!-- 3D osmon (orqa fon) -->
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+
+  <!-- ===== Header ===== -->
+  <header class="topbar" id="top">
+    <a class="logo" href="#home" data-nav data-track="Logo" aria-label="Bosh sahifa">
+      <span class="logo-mark" aria-hidden="true">
+        <img id="logo-img" alt="" hidden>
+        <svg id="logo-svg" viewBox="0 0 32 32"><path d="M6 11.5 16 6l10 5.5v9L16 26 6 20.5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M6 11.5 16 17l10-5.5M16 17v9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="logo-text"><b data-bind="brand.name">TopibBer</b><small data-bind="brand.tagline">Xitoydan topib beramiz</small></span>
+    </a>
+    <nav class="nav" aria-label="Asosiy menyu">
+      <a href="#qanday" data-nav>Jarayon</a>
+      <a href="#katalog" data-nav>Katalog</a>
+      <a href="#shartlar" data-nav>Shartlar</a>
+      <a href="#taqiqlangan" data-nav>Taqiqlangan</a>
+      <a href="#aloqa" data-nav>Aloqa</a>
+    </nav>
+    <a class="btn btn-accent btn-sm" href="#buyurtma" data-order data-track="Yuqori tugma: Buyurtma">Buyurtma berish</a>
+  </header>
+
+  <!-- Yon tomondagi yo‘nalish ko‘rsatkichi -->
+  <nav class="rail" id="rail" aria-label="Bo‘limlar">
+    <a href="#home" data-nav aria-label="Bosh sahifa"><span>Bosh sahifa</span></a>
+    <a href="#qanday" data-nav aria-label="Jarayon"><span>Jarayon</span></a>
+    <a href="#katalog" data-nav aria-label="Katalog"><span>Katalog</span></a>
+    <a href="#shartlar" data-nav aria-label="Shartlar"><span>Shartlar</span></a>
+    <a href="#taqiqlangan" data-nav aria-label="Taqiqlangan mahsulotlar"><span>Taqiqlangan</span></a>
+    <a href="#buyurtma" data-nav aria-label="Buyurtma"><span>Buyurtma</span></a>
+    <a href="#aloqa" data-nav aria-label="Aloqa"><span>Aloqa</span></a>
+  </nav>
+
+  <!-- Parvoz paneli -->
+  <div class="hud" aria-hidden="true">
+    <div class="hud-alt"><small>Balandlik</small><b id="hud-alt">6 400 m</b></div>
+    <div class="hud-route">
+      <span>Xitoy</span>
+      <span class="hud-track"><i id="hud-bar"></i><em id="hud-plane"></em></span>
+      <span>Sizning eshigingiz</span>
+    </div>
+  </div>
+
+  <main id="main">
+    <!-- ===== 1. Hero ===== -->
+    <section class="scene first" id="home" data-z="0,-40" style="--len: 200vh" aria-label="Bosh sahifa">
+      <div class="scene-pin">
+        <div class="scene-inner hero">
+          <p class="eyebrow" data-t="hero.eyebrow">Pinduoduo’dan buyurtma xizmati</p>
+          <h1 data-t="hero.title">Xitoydan yoqqan buyumingizni <em>buyurtma qiling</em></h1>
+          <p class="lead" data-t="hero.lead">Kerakli mahsulotni topib beramiz va siz uchun buyurtma qilamiz.</p>
+
+          <form class="linkbar" id="linkbar" autocomplete="off">
+            <span class="linkbar-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </span>
+            <label class="sr-only" for="linkbar-input">Pinduoduo mahsulot havolasi</label>
+            <input id="linkbar-input" type="url" inputmode="url" placeholder="Havolani joylang…">
+            <button class="btn btn-ink" type="submit" data-track="Hero: Narxini so‘rash">Narxini so‘rash</button>
+          </form>
+
+          <div class="hero-actions">
+            <a class="btn btn-accent btn-lg" href="#buyurtma" data-order data-track="Hero: Buyurtma berish" data-t="hero.cta">Buyurtma berish</a>
+            <a class="btn btn-glass btn-lg" href="#katalog" data-nav data-track="Hero: Katalog" data-t="hero.cta2">Katalog</a>
+          </div>
+        </div>
+        <div class="scroll-hint" aria-hidden="true"><span class="mouse"><i></i></span><span data-t="hero.hint">Aylantiring — uchib ketamiz</span></div>
+      </div>
+    </section>
+
+    <div class="flight" data-z="-60,-125" aria-hidden="true"></div>
+
+    <!-- ===== 2. Jarayon ===== -->
+    <section class="scene" id="qanday" data-z="-145,-185" style="--len: 200vh" aria-labelledby="steps-title">
+      <div class="scene-pin">
+        <div class="scene-inner">
+          <p class="kicker" data-t="steps.kicker">Qanday ishlaydi</p>
+          <h2 id="steps-title" data-t="steps.title">Uch qadam — va buyurtma <em>yo‘lda</em></h2>
+          <ol class="steps" id="steps"></ol>
+        </div>
+      </div>
+    </section>
+
+    <div class="flight" data-z="-200,-265" aria-hidden="true"></div>
+
+    <!-- ===== 3. Katalog ===== -->
+    <section class="block" id="katalog" data-z="-285,-345" aria-labelledby="catalog-title">
+      <div class="block-head reveal">
+        <p class="kicker" data-t="catalog.kicker">Katalog</p>
+        <h2 id="catalog-title" data-t="catalog.title">Buyurtma qilsa <em>bo‘ladigan</em> mahsulotlar</h2>
+        <p class="muted"><span data-t="catalog.sub">Kerakli narsa yo‘qmi?</span> <a href="#buyurtma" data-order data-product="__custom" data-track="Katalog: Havola yuborish" data-t="catalog.sublink">Havolasini yuboring →</a></p>
+      </div>
+      <div class="chips reveal" id="chips" role="tablist" aria-label="Kategoriyalar"></div>
+      <div class="grid" id="grid"></div>
+
+      <div class="gallery reveal" id="gallery" hidden>
+        <div class="block-head">
+          <p class="kicker" data-t="gallery.kicker">Yetkazilgan buyurtmalar</p>
+          <h2 data-t="gallery.title">Haqiqiy <em>natijalar</em></h2>
+        </div>
+        <div class="gallery-grid" id="gallery-grid"></div>
+      </div>
+
+      <div class="own-link glass reveal">
+        <div>
+          <p class="kicker" data-t="own.kicker">O‘zingiz topdingizmi?</p>
+          <h3 data-t="own.title">Havolani yuboring — <em>narxini aytamiz</em></h3>
+          <p class="muted" data-t="own.text">Pinduoduo’da yoqqan mahsulot havolasini yoki skrinshotini yuboring. Narx va muddatni hisoblab, sizga xabar beramiz.</p>
+        </div>
+        <a class="btn btn-accent btn-lg" href="#buyurtma" data-order data-product="__custom" data-track="Havola yuborish bloki" data-t="own.cta">Havola yuborish</a>
+      </div>
+    </section>
+
+    <div class="flight" data-z="-365,-425" aria-hidden="true"></div>
+
+    <!-- ===== 4. Shartlar ===== -->
+    <section class="block" id="shartlar" data-z="-440,-480" aria-labelledby="terms-title">
+      <div class="block-head reveal">
+        <p class="kicker" data-t="terms.kicker">Narx va shartlar</p>
+        <h2 id="terms-title" data-t="terms.title">Hammasi <em>oldindan</em> aniq</h2>
+      </div>
+      <div class="pricing" id="pricing"></div>
+      <div class="terms glass reveal" id="terms"></div>
+    </section>
+
+    <div class="flight" data-z="-485,-510" aria-hidden="true"></div>
+
+    <!-- ===== 5. Taqiqlangan mahsulotlar ===== -->
+    <section class="block" id="taqiqlangan" data-z="-520,-550" aria-labelledby="ban-title">
+      <div class="ban glass reveal">
+        <div class="ban-head">
+          <p class="kicker" data-t="prohibited.kicker">Taqiqlangan mahsulotlar</p>
+          <h2 id="ban-title" data-t="prohibited.title">Bularni <em>olib bera olmaymiz</em></h2>
+          <p class="muted" data-t="prohibited.text">Quyidagi mahsulotlarni buyurtma qilib bo‘lmaydi. Bunday so‘rovlarni qabul qila olmaymiz.</p>
+        </div>
+        <ul class="ban-grid" id="prohibited-list"></ul>
+        <p class="ban-note" data-t="prohibited.note">Ro‘yxat to‘liq bo‘lmasligi mumkin. Mahsulot ruxsat etilganiga ishonchingiz komil bo‘lmasa, buyurtmadan oldin bizdan so‘rang.</p>
+      </div>
+    </section>
+
+    <div class="flight" data-z="-560,-585" aria-hidden="true"></div>
+
+    <!-- ===== 6. Buyurtma ===== -->
+    <section class="block" id="buyurtma" data-z="-595,-640" aria-labelledby="order-title">
+      <div class="order">
+        <div class="order-intro reveal">
+          <p class="kicker" data-t="order.kicker">Buyurtma</p>
+          <h2 id="order-title" data-t="order.title">So‘rov <em>qoldiring</em></h2>
+          <p class="muted" data-t="order.text">Bu majburiyat emas. Narx va muddatni aytamiz — keyin o‘zingiz qaror qilasiz.</p>
+          <ul class="order-points">
+            <li data-t="order.p1">Yakuniy summa oldindan aytiladi</li>
+            <li data-t="order.p2">Muddat mahsulotga qarab aniqlanadi</li>
+            <li data-t="order.p3">Savollar bo‘lsa — Telegram’da yozing</li>
+          </ul>
+        </div>
+
+        <form class="form glass reveal" id="order-form" novalidate>
+          <div class="field">
+            <label for="f-name">Ismingiz <span class="req">*</span></label>
+            <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Masalan, Aziza" required aria-describedby="e-name">
+            <p class="error" id="e-name" data-for="name" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="f-phone">Telefon raqamingiz <span class="req">*</span></label>
+            <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 __ ___ __ __" required aria-describedby="e-phone">
+            <p class="error" id="e-phone" data-for="phone" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="f-product">Mahsulot <span class="req">*</span></label>
+            <div class="select">
+              <select id="f-product" name="product" required aria-describedby="e-product"></select>
+            </div>
+            <p class="error" id="e-product" data-for="product" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="f-link">Mahsulot havolasi <span class="opt">agar o‘zingiz topgan bo‘lsangiz</span></label>
+            <input id="f-link" name="link" type="url" inputmode="url" placeholder="https://…" aria-describedby="e-link">
+            <p class="error" id="e-link" data-for="link" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <span class="label" id="l-image">Rasm yoki skrinshot <span class="opt">ixtiyoriy</span></span>
+            <label class="upload" for="f-image">
+              <input id="f-image" name="image" type="file" accept="image/*" aria-labelledby="l-image" aria-describedby="e-image">
+              <span class="upload-empty">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l4.5-4.5 3 3L16 10l4 4M4 5h16v14H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                <span>Rasm tanlash</span>
+              </span>
+              <span class="upload-preview" hidden><img alt="Tanlangan rasm"><button type="button" class="upload-clear" aria-label="Rasmni olib tashlash">×</button></span>
+            </label>
+            <p class="error" id="e-image" data-for="image" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="f-qty">Miqdori</label>
+            <div class="qty">
+              <button type="button" data-step="-1" aria-label="Kamaytirish">−</button>
+              <input id="f-qty" name="qty" type="number" min="1" max="999" value="1" inputmode="numeric">
+              <button type="button" data-step="1" aria-label="Ko‘paytirish">+</button>
+            </div>
+          </div>
+
+          <div class="field span-2">
+            <label for="f-note">Qo‘shimcha izoh <span class="opt">rangi, o‘lchami va h.k.</span></label>
+            <textarea id="f-note" name="note" rows="3" placeholder="Masalan: qora rang, 42-o‘lcham" maxlength="600"></textarea>
+          </div>
+
+          <!-- Spam tuzog‘i: odam ko‘rmaydi, botlar to‘ldiradi -->
+          <div class="hp" aria-hidden="true"><label>Veb-sayt <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+
+          <div class="field span-2 check">
+            <label class="checkbox" for="f-confirm">
+              <input id="f-confirm" name="confirm" type="checkbox" aria-describedby="e-confirm">
+              <span><span data-t="order.confirm">Mahsulot taqiqlangan ro‘yxatda yo‘qligini tasdiqlayman</span> <a href="#taqiqlangan" data-nav>(ro‘yxat)</a></span>
+            </label>
+            <p class="error" id="e-confirm" data-for="confirm" role="alert"></p>
+          </div>
+
+          <div class="notice span-2" id="form-notice" role="alert" hidden></div>
+
+          <button class="btn btn-accent btn-lg btn-block span-2" type="submit" data-t="order.submit">So‘rov yuborish</button>
+          <p class="fineprint span-2" data-t="order.fine">Yuborish orqali siz bilan telefon yoki Telegram orqali bog‘lanishimizga rozilik bildirasiz.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== 7. Aloqa ===== -->
+    <section class="block" id="aloqa" data-z="-655,-700" aria-labelledby="contacts-title">
+      <div class="contacts glass-dark reveal">
+        <div>
+          <p class="kicker" data-t="contacts.kicker">Aloqa</p>
+          <h2 id="contacts-title" data-t="contacts.title">Savolingiz bormi? <em>Yozing.</em></h2>
+          <p class="hours" data-bind="contacts.workHours"></p>
+        </div>
+        <div class="contact-links">
+          <a class="contact" data-href="contacts.phoneLink" data-track="Aloqa: Telefon">
+            <span class="contact-ico"><svg viewBox="0 0 24 24"><path d="M6.6 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.1 6.1l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7a2 2 0 0 1 2.1-2.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+            <span><small>Telefon</small><b data-bind="contacts.phone"></b></span>
+          </a>
+          <a class="contact" data-href="contacts.telegramLink" target="_blank" rel="noopener" data-track="Aloqa: Telegram">
+            <span class="contact-ico"><svg viewBox="0 0 24 24"><path d="M21 4 3 11l6 2 2 6 3.5-4.2L19 18z M9 13l9-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+            <span><small>Telegram</small><b data-bind="contacts.telegram"></b></span>
+          </a>
+          <a class="contact" data-href="contacts.instagramLink" target="_blank" rel="noopener" data-track="Aloqa: Instagram">
+            <span class="contact-ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></span>
+            <span><small>Instagram</small><b data-bind="contacts.instagram"></b></span>
+          </a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p><b data-bind="brand.name">TopibBer</b> — <span data-t="footer.line1">mustaqil buyurtma xizmati.</span></p>
+        <p data-t="footer.line2">Ushbu sayt Pinduoduo’ning rasmiy sayti emas va u bilan bog‘liq emas. Biz mijozlar nomidan buyurtma beramiz.</p>
+        <p>© <span id="year"></span></p>
+      </footer>
+    </section>
+  </main>
+
+  <!-- Telefon uchun pastki panel -->
+  <div class="dock" id="dock">
+    <a class="btn btn-accent btn-block" href="#buyurtma" data-order data-track="Pastki panel: Buyurtma">Buyurtma berish</a>
+    <a class="dock-tg" data-href="contacts.telegramLink" target="_blank" rel="noopener" data-track="Pastki panel: Telegram" aria-label="Telegram">
+      <svg viewBox="0 0 24 24"><path d="M21 4 3 11l6 2 2 6 3.5-4.2L19 18z M9 13l9-6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+
+  <!-- Tasdiq oynasi -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card">
+      <div class="modal-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3 id="modal-title" data-t="modal.title">So‘rovingiz qabul qilindi</h3>
+      <p data-t="modal.text">So‘rovingiz qabul qilindi. Narx va muddatni aniqlashtirish uchun siz bilan bog‘lanamiz.</p>
+      <dl class="modal-summary" id="modal-summary"></dl>
+      <button class="btn btn-ink btn-block" type="button" data-close>Yaxshi</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/texts.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/track.js"></script>
+  <script src="js/vendor/three.min.js" defer></script>
+  <script src="js/world.js" defer></script>
+</body>
+</html>
