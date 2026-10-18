@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin panel — TopibBer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2318202b'/%3E%3Cpath d='M7 12 16 7l9 5v8l-9 5-9-5zM7 12l9 5 9-5M16 17v8' fill='none' stroke='white' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+  <aside class="side">
+    <div class="brand">
+      <span class="brand-mark">A</span>
+      <span><b id="brand-name">TopibBer</b><small>Admin panel</small></span>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Bo‘limlar">
+      <button data-tab="stats" class="on">Statistika</button>
+      <button data-tab="products">Mahsulotlar</button>
+      <button data-tab="categories">Kategoriyalar</button>
+      <button data-tab="texts">Matnlar</button>
+      <button data-tab="images">Rasmlar</button>
+      <button data-tab="terms">Shartlar</button>
+      <button data-tab="prohibited">Taqiqlangan</button>
+      <button data-tab="contacts">Aloqa</button>
+      <button data-tab="connect">Ulanish</button>
+      <button data-tab="publish" class="tab-publish">Nashr qilish</button>
+    </nav>
+    <div class="side-foot">
+      <span class="save-state" id="save-state">Saqlandi</span>
+      <a class="btn btn-line btn-sm" href="index.html?preview=1" target="_blank" rel="noopener">Saytda ko‘rish ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="banner" id="draft-banner" hidden>
+      <span>Saqlanmagan o‘zgarishlar bor — ular hozircha faqat shu brauzerda. Saytga chiqarish uchun <a href="#" data-goto="publish">Nashr qilish</a> bo‘limiga o‘ting.</span>
+    </div>
+
+    <!-- Statistika -->
+    <section class="panel" data-panel="stats">
+      <header class="panel-head">
+        <div><h1>Statistika</h1><p class="muted">Saytga kirganlar, ular qayerdan kelgani va nimani bosgani.</p></div>
+        <div class="actions">
+          <select id="stats-range" aria-label="Davr">
+            <option value="1">Bugun</option>
+            <option value="7">So‘nggi 7 kun</option>
+            <option value="30" selected>So‘nggi 30 kun</option>
+          </select>
+          <button class="btn btn-line" id="stats-refresh">Yangilash</button>
+        </div>
+      </header>
+      <div id="stats-setup" class="card" hidden>
+        <h2>Statistika hali ulanmagan</h2>
+        <p class="muted">Statistika va buyurtmalar uchun bepul server (Cloudflare Worker) kerak. Ulash 10 daqiqa oladi.</p>
+        <div class="actions"><button class="btn btn-accent" data-goto="connect">Ulash bo‘limiga o‘tish</button></div>
+      </div>
+      <div id="stats-body" hidden>
+        <div class="kpis" id="kpis"></div>
+        <div class="card"><h2>Kunlar bo‘yicha tashriflar</h2><div id="chart-days"></div></div>
+        <div class="two">
+          <div class="card"><h2>Qayerdan kirishgan (davlat)</h2><div id="list-countries"></div></div>
+          <div class="card"><h2>Shaharlar</h2><div id="list-cities"></div></div>
+        </div>
+        <div class="two">
+          <div class="card"><h2>Nimani bosishgan</h2><div id="list-clicks"></div></div>
+          <div class="card"><h2>Qaysi bo‘limgacha yetishgan</h2><div id="list-sections"></div></div>
+        </div>
+        <div class="two">
+          <div class="card"><h2>Qaerdan kelishgan</h2><div id="list-refs"></div></div>
+          <div class="card"><h2>Qurilma</h2><div id="list-devices"></div></div>
+        </div>
+        <div class="two">
+          <div class="card"><h2>Buyurtma so‘ralgan mahsulotlar</h2><div id="list-orders"></div></div>
+          <div class="card"><h2>Rad etilgan (taqiqlangan) urinishlar</h2><div id="list-blocked"></div></div>
+        </div>
+        <p class="hint">Hisob-kitob taxminiy: bir qurilma bir kunda bitta odam hisoblanadi. Cookie ishlatilmaydi, IP manzil saqlanmaydi. Siz admin panelga kirgan brauzer hisobga olinmaydi.</p>
+      </div>
+      <div id="stats-error" class="result err" hidden></div>
+    </section>
+
+    <!-- Mahsulotlar -->
+    <section class="panel" data-panel="products" hidden>
+      <header class="panel-head">
+        <div><h1>Mahsulotlar</h1><p class="muted">Katalogdagi mahsulotlar. Tartibni ↑ ↓ bilan o‘zgartiring.</p></div>
+        <button class="btn btn-accent" id="add-product">+ Yangi mahsulot</button>
+      </header>
+      <div class="toolbar">
+        <input type="search" id="product-search" placeholder="Qidirish…" aria-label="Qidirish">
+        <select id="product-filter" aria-label="Kategoriya"></select>
+      </div>
+      <div class="plist" id="product-list"></div>
+    </section>
+
+    <!-- Kategoriyalar -->
+    <section class="panel" data-panel="categories" hidden>
+      <header class="panel-head">
+        <div><h1>Kategoriyalar</h1><p class="muted">Katalogdagi filtr tugmalari.</p></div>
+        <button class="btn btn-accent" id="add-category">+ Kategoriya</button>
+      </header>
+      <div class="rows" id="category-list"></div>
+    </section>
+
+    <!-- Matnlar -->
+    <section class="panel" data-panel="texts" hidden>
+      <header class="panel-head"><div><h1>Matnlar</h1><p class="muted">Saytdagi har bir yozuvni o‘zgartiring. Bo‘sh qoldirsangiz — standart matn chiqadi. Sarlavhalarda <b>*so‘z*</b> yulduzcha ichida bo‘lsa, u rangli kursiv bo‘ladi.</p></div></header>
+      <div id="texts-edit"></div>
+      <div class="card">
+        <h2>Brend</h2>
+        <div class="grid2">
+          <label class="f"><span>Sayt nomi</span><input data-bind="brand.name"></label>
+          <label class="f"><span>Shior</span><input data-bind="brand.tagline"></label>
+        </div>
+      </div>
+      <div class="card"><h2>Buyurtma jarayoni (3 bosqich)</h2><div id="steps-edit"></div></div>
+      <div class="card"><h2>Narx va muddat haqida</h2><div id="pricing-edit"></div></div>
+    </section>
+
+    <!-- Rasmlar -->
+    <section class="panel" data-panel="images" hidden>
+      <header class="panel-head"><div><h1>Rasmlar</h1><p class="muted">Logotip va galereya. Mahsulot rasmlari — “Mahsulotlar” bo‘limida.</p></div></header>
+      <div class="card">
+        <h2>Logotip</h2>
+        <div class="logo-edit">
+          <div class="img-box small" id="logo-box"><span>A</span><img id="logo-prev" alt="" hidden></div>
+          <div class="actions">
+            <label class="btn btn-line file-btn">Logotip yuklash<input type="file" id="logo-file" accept="image/*"></label>
+            <button class="btn btn-ghost" id="logo-clear">Olib tashlash</button>
+          </div>
+        </div>
+        <p class="hint">Kvadrat rasm yaxshi (kamida 128×128). Brauzer yorlig‘i (favicon) sifatida ham ishlatiladi.</p>
+      </div>
+      <div class="card">
+        <div class="panel-head" style="margin:0 0 12px">
+          <div><h2 style="margin:0">Galereya: yetkazilgan buyurtmalar</h2><p class="muted">Faqat o‘zingizning haqiqiy suratlaringiz. Rasm qo‘shilmaguncha bu bo‘lim saytda ko‘rinmaydi.</p></div>
+          <label class="btn btn-accent file-btn">+ Rasm qo‘shish<input type="file" id="gallery-file" accept="image/*" multiple></label>
+        </div>
+        <div class="gal" id="gallery-edit"></div>
+      </div>
+    </section>
+
+    <!-- Shartlar -->
+    <section class="panel" data-panel="terms" hidden>
+      <header class="panel-head">
+        <div><h1>Shartlar</h1><p class="muted">To‘lov, yetkazib berish, qaytarish. Paragraflarni bo‘sh qator bilan ajrating. “[…]” bilan boshlangan qator mijozga ko‘rsatilmaydi.</p></div>
+        <button class="btn btn-line" id="add-term">+ Bo‘lim</button>
+      </header>
+      <div id="terms-edit"></div>
+    </section>
+
+    <!-- Taqiqlangan -->
+    <section class="panel" data-panel="prohibited" hidden>
+      <header class="panel-head"><div><h1>Taqiqlangan mahsulotlar</h1><p class="muted">Har bir qatorga bittadan yozing.</p></div></header>
+      <div class="card">
+        <label class="f"><span>Saytda ko‘rinadigan ro‘yxat</span><textarea id="prohibited-list" rows="10"></textarea></label>
+        <label class="f"><span>Kalit so‘zlar <em>mijoz formada shu so‘zlardan birini yozsa, so‘rov qabul qilinmaydi. Kichik harflarda; o‘zbek, rus, ingliz yozilishlarini qo‘shing</em></span><textarea id="prohibited-keywords" rows="10"></textarea></label>
+        <div class="check-try">
+          <label class="f"><span>Sinab ko‘ring: mahsulot nomini yozing</span><input id="ban-try" placeholder="Masalan: Dior parfyum"></label>
+          <div class="result" id="ban-try-result" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aloqa -->
+    <section class="panel" data-panel="contacts" hidden>
+      <header class="panel-head"><div><h1>Aloqa</h1><p class="muted">Saytdagi tugmalar shu ma’lumotlardan olinadi.</p></div></header>
+      <div class="card grid2">
+        <label class="f"><span>Telefon raqam</span><input id="c-phone" inputmode="tel" placeholder="+998 90 000 00 00"></label>
+        <label class="f"><span>Ish vaqti</span><input data-bind="contacts.workHours" placeholder="Har kuni 9:00 – 21:00"></label>
+        <label class="f"><span>Telegram <em>@ bilan yoki havola</em></span><input id="c-telegram" placeholder="@username"></label>
+        <label class="f"><span>Instagram <em>@ bilan yoki havola</em></span><input id="c-instagram" placeholder="@username"></label>
+      </div>
+    </section>
+
+    <!-- Ulanish -->
+    <section class="panel" data-panel="connect" hidden>
+      <header class="panel-head"><div><h1>Ulanish</h1><p class="muted">Buyurtmalar Telegram’ga kelishi va statistika yig‘ilishi uchun bitta bepul server kerak.</p></div></header>
+
+      <div class="card">
+        <h2>1. Serverni yarating (bir marta, ~10 daqiqa)</h2>
+        <ol class="howto">
+          <li><a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">Cloudflare</a>’da bepul hisob oching → <b>Workers &amp; Pages</b> → <b>Create</b> → <b>Create Worker</b> → <b>Deploy</b> → <b>Edit code</b>.</li>
+          <li>Ichidagi hamma kodni o‘chirib, saytdagi <code>worker/worker.js</code> faylining ichidagisini joylang va <b>Deploy</b> bosing.</li>
+          <li><b>Storage &amp; Databases → D1 SQL Database</b> → <b>Create</b> (nom: <code>topibber</code>). Worker → <b>Settings → Bindings → Add → D1 database</b>: o‘zgaruvchi nomi aynan <code>DB</code>, database — yaratganingiz. Jadvallarni qo‘lda yaratish shart emas.</li>
+          <li><b>Settings → Variables and Secrets</b> → <b>Add</b> (turi <b>Secret</b>): <code>BOT_TOKEN</code> (BotFather bergan token), <code>CHAT_ID</code> (pastda topiladi), <code>ADMIN_KEY</code> (o‘zingiz o‘ylab topgan uzun parol, kamida 20 belgi).</li>
+          <li>Worker manzilini (<code>https://…workers.dev</code>) pastga qo‘ying.</li>
+        </ol>
+        <p class="hint"><b>Bot yaratish:</b> Telegram’da <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> → <code>/newbot</code>. Keyin o‘z botingizga kirib <b>/start</b> bosing. Chat ID ni “Chat ID ni topish” tugmasi bilan toping — token faqat shu tugma uchun vaqtincha so‘raladi va hech qayerda saqlanmaydi.</p>
+      </div>
+
+      <div class="card">
+        <h2>2. Manzil va kalit</h2>
+        <div class="grid2">
+          <label class="f"><span>Worker manzili</span><input id="api-endpoint" placeholder="https://topibber.sizning-nomingiz.workers.dev" autocomplete="off" spellcheck="false"></label>
+          <label class="f"><span>ADMIN_KEY <em>faqat shu brauzerda saqlanadi, saytga chiqmaydi</em></span><input id="admin-key" type="password" autocomplete="off" placeholder="Siz o‘ylab topgan parol"></label>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ink" id="check-conn">Ulanishni tekshirish</button>
+          <button class="btn btn-line" id="test-order">Sinov xabarini yuborish</button>
+        </div>
+        <div class="result" id="conn-result" hidden></div>
+      </div>
+
+      <div class="card">
+        <h2>Chat ID ni topish <em class="opt">ixtiyoriy yordamchi</em></h2>
+        <div class="grid2">
+          <label class="f"><span>Bot token <em>saqlanmaydi</em></span><input id="tmp-token" type="password" autocomplete="off" placeholder="123456789:AA…"></label>
+        </div>
+        <div class="actions"><button class="btn btn-line" id="find-chat">Chat ID ni topish</button></div>
+        <div class="result" id="chat-result" hidden></div>
+      </div>
+
+      <p class="hint">Ulangandan keyin <b>Nashr qilish</b> bo‘limidan yangi <code>data.js</code> ni yuklab, saytga qo‘ying — Worker manzili saytga shunda yetib boradi. Manzil bo‘sh bo‘lsa, forma demo rejimda ishlaydi va statistika yig‘ilmaydi.</p>
+    </section>
+
+    <!-- Nashr qilish -->
+    <section class="panel" data-panel="publish" hidden>
+      <header class="panel-head"><div><h1>Nashr qilish</h1><p class="muted">O‘zgarishlar saytga qanday chiqadi.</p></div></header>
+      <div class="card">
+        <h2>Nashrdan oldin tekshiruv</h2>
+        <ul class="checks" id="checks"></ul>
+      </div>
+      <div class="card publish">
+        <div class="pstep"><span>1</span><div><b>Ko‘rib chiqing</b><p class="muted">Qoralamani saytning o‘zida ko‘ring.</p><a class="btn btn-line" href="index.html?preview=1" target="_blank" rel="noopener">Saytda ko‘rish ↗</a></div></div>
+        <div class="pstep"><span>2</span><div><b>Yangilanish faylini yuklab oling</b><p class="muted">ZIP ichida <code>js/data.js</code> va yangi rasmlar (<code>images/uploads/</code>) bor. Rasmlar alohida fayl bo‘lgani uchun sayt tez ochiladi.</p><button class="btn btn-accent" id="download-zip">yangilanish.zip ni yuklab olish</button> <button class="btn btn-ghost" id="download-js">faqat data.js</button></div></div>
+        <div class="pstep"><span>3</span><div><b>Sayt papkasiga yoying</b><p class="muted">ZIP’ni sayt papkasiga yoying (mavjud fayllarni almashtiring) va papkani hostingga qayta yuklang (Netlify’da — papkani yana sudrab tashlang). Hamma qurilmada yangilanadi.</p></div></div>
+      </div>
+      <div class="card">
+        <h2>Boshqa amallar</h2>
+        <div class="actions">
+          <label class="btn btn-line file-btn">data.js faylidan tiklash<input type="file" id="import" accept=".js,.json,text/javascript,application/json"></label>
+          <button class="btn btn-danger" id="discard">Qoralamani bekor qilish</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mahsulot tahrirlash oynasi -->
+  <div class="modal" id="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmodal-title" hidden>
+    <div class="modal-bg" data-close></div>
+    <form class="modal-card" id="pform">
+      <header><h2 id="pmodal-title">Mahsulot</h2><button type="button" class="x" data-close aria-label="Yopish">×</button></header>
+      <div class="pform-grid">
+        <div class="img-edit">
+          <div class="img-box" id="p-img-box"><span id="p-img-emoji">📦</span><img id="p-img" alt="" hidden></div>
+          <label class="btn btn-line btn-sm file-btn">Rasm yuklash<input type="file" id="p-file" accept="image/*"></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="p-img-clear">Rasmni olib tashlash</button>
+        </div>
+        <div class="fields">
+          <label class="f"><span>Nomi *</span><input id="p-name" required></label>
+          <label class="f"><span>Kategoriya</span><select id="p-cat"></select></label>
+          <label class="f"><span>Qisqa tavsif</span><textarea id="p-desc" rows="2"></textarea></label>
+          <div class="grid2">
+            <label class="f"><span>Narx <em>bo‘sh — “Narxini so‘rash”</em></span><input id="p-price" placeholder="185 000 so‘m"></label>
+            <label class="f"><span>Belgi <em>rasm yo‘q paytda</em></span><input id="p-emoji" maxlength="4"></label>
+          </div>
+          <div class="result err" id="p-ban" hidden></div>
+        </div>
+      </div>
+      <footer><button type="button" class="btn btn-line" data-close>Bekor qilish</button><button class="btn btn-accent" type="submit">Saqlash</button></footer>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/texts.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
