@@ -65,12 +65,17 @@
     }, 250);
   }
   function updateState() {
-    var dirty = JSON.stringify(D) !== JSON.stringify(BASE);
+    var now = JSON.stringify(D), dirty = now !== JSON.stringify(BASE);
+    var pub = ""; try { pub = localStorage.getItem("topibber-published") || ""; } catch (e) {}
+    var waiting = dirty && pub === now; // GitHub’ga yuborilgan, sayt hali yangilanmoqda
+    if (waiting) dirty = false;
     var bar = $("#savebar");
     bar.classList.toggle("dirty", dirty);
-    $("#savebar-text").textContent = dirty
-      ? "Saqlandi (avtomatik), lekin sayt hali eskicha. O‘zgarishlar saytda ko‘rinishi uchun uni chiqarish kerak."
-      : "✓ Hamma o‘zgarishlar saqlangan va saytdagi bilan bir xil.";
+    $("#savebar-text").textContent = waiting
+      ? "✓ Yuborildi. Sayt 1–2 daqiqada yangilanadi (keyin sahifani yangilang)."
+      : dirty
+        ? "Saqlandi (avtomatik), lekin sayt hali eskicha. O‘zgarishlar saytda ko‘rinishi uchun uni chiqarish kerak."
+        : "✓ Hamma o‘zgarishlar saqlangan va saytdagi bilan bir xil.";
     $("#savebar-btn").hidden = !dirty;
     var s = $("#save-state");
     s.textContent = dirty ? "Qoralama saqlandi · nashr qilinmagan" : "Saytdagi bilan bir xil";
@@ -689,6 +694,68 @@
     if (pkg.count) { if (!confirm("Qoralamada " + pkg.count + " ta yangi rasm bor. Faqat data.js yuklansa, rasmlar yetishmaydi. ZIP yuklab olish tavsiya etiladi. Baribir davom etilsinmi?")) return; }
     download(new Blob([pkg.js], { type: "text/javascript;charset=utf-8" }), "data.js");
   });
+  /* ---------- Nashr: GitHub'ga bitta commit ---------- */
+  var ghRepo = $("#gh-repo"), ghToken = $("#gh-token");
+  try {
+    ghRepo.value = localStorage.getItem("topibber-ghrepo") || ghRepo.value;
+    ghToken.value = localStorage.getItem("topibber-ghtoken") || "";
+  } catch (e) {}
+  ghRepo.addEventListener("input", function () { try { localStorage.setItem("topibber-ghrepo", ghRepo.value.trim()); } catch (e) {} });
+  ghToken.addEventListener("input", function () { try { localStorage.setItem("topibber-ghtoken", ghToken.value.trim()); } catch (e) {} });
+
+  function bytesToBase64(bytes) {
+    var s = "", chunk = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunk) s += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    return btoa(s);
+  }
+  function gh(path, method, body) {
+    var repo = ghRepo.value.trim();
+    return fetch("https://api.github.com/repos/" + repo + path, {
+      method: method || "GET",
+      headers: { Authorization: "Bearer " + ghToken.value.trim(), Accept: "application/vnd.github+json", "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) {
+          var m = j.message || ("HTTP " + r.status);
+          if (r.status === 401) m = "Token noto‘g‘ri yoki muddati o‘tgan.";
+          else if (r.status === 403 || r.status === 404) m = "Token bu repozitoriyga yozish huquqiga ega emas (Contents: Read and write) yoki repozitoriy nomi xato. (" + m + ")";
+          throw new Error(m);
+        }
+        return j;
+      });
+    });
+  }
+  $("#gh-publish").addEventListener("click", function () {
+    var box = $("#gh-result"), btn = this;
+    if (!/^[\w.-]+\/[\w.-]+$/.test(ghRepo.value.trim())) { show(box, "Repozitoriy nomini “egasi/nomi” ko‘rinishida yozing.", "err"); return; }
+    if (!ghToken.value.trim()) { show(box, "Avval GitHub tokenni kiriting (yuqoridagi 1-qadam).", "err"); return; }
+    var pkg = buildPackage();
+    btn.disabled = true;
+    show(box, "Yuborilmoqda…");
+    var snapshot = JSON.stringify(D), info = {};
+    gh("", "GET").then(function (r) { info.branch = r.default_branch || "main"; return gh("/git/ref/heads/" + info.branch, "GET"); })
+      .then(function (ref) { info.parent = ref.object.sha; return gh("/git/commits/" + info.parent, "GET"); })
+      .then(function (c) {
+        info.baseTree = c.tree.sha;
+        return pkg.files.reduce(function (p, f) {
+          return p.then(function (list) {
+            return gh("/git/blobs", "POST", { content: bytesToBase64(f.data), encoding: "base64" }).then(function (b) { list.push({ path: f.name, mode: "100644", type: "blob", sha: b.sha }); return list; });
+          });
+        }, Promise.resolve([]));
+      })
+      .then(function (tree) { return gh("/git/trees", "POST", { base_tree: info.baseTree, tree: tree }); })
+      .then(function (t) { return gh("/git/commits", "POST", { message: "Admin paneldan yangilash (" + new Date().toLocaleString("ru-RU") + ")", tree: t.sha, parents: [info.parent] }); })
+      .then(function (c) { info.commit = c.sha; return gh("/git/refs/heads/" + info.branch, "PATCH", { sha: c.sha }); })
+      .then(function () {
+        try { localStorage.setItem("topibber-published", snapshot); } catch (e) {}
+        updateState();
+        show(box, "Yuborildi (" + info.commit.slice(0, 7) + ", " + pkg.files.length + " ta fayl). Sayt 1–2 daqiqada yangilanadi.", "ok");
+      })
+      .catch(function (e) { show(box, "Yuborib bo‘lmadi: " + e.message, "err"); })
+      .then(function () { btn.disabled = false; });
+  });
+
   $("#import").addEventListener("change", function () {
     var f = this.files && this.files[0];
     if (!f) return;
