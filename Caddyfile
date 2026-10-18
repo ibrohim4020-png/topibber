@@ -15,11 +15,11 @@
 		X-Frame-Options SAMEORIGIN
 	}
 
-	# Rasm va kutubxonalar uzoq saqlansin, sahifa va ma'lumotlar har safar yangilansin
+	# Sahifa, kod va ma'lumotlar har safar tekshirilsin (yangilanish darrov ko'rinsin);
+	# faqat og'ir rasm va kutubxonalar uzoq saqlansin
+	header Cache-Control "no-cache"
 	@static path /images/* /js/vendor/*
 	header @static Cache-Control "public, max-age=2592000"
-	@fresh path / /index.html /js/data.js /js/app.js /js/world.js /js/track.js /js/texts.js /css/*
-	header @fresh Cache-Control "no-cache"
 
 	# Serverga kerak bo'lmagan fayllar tashqariga chiqmasin
 	@private path /worker/* /Dockerfile /Caddyfile /.dockerignore /README.md
