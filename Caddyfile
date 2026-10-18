@@ -7,6 +7,13 @@
 :{$PORT:8080} {
 	root * /srv
 	encode gzip zstd
+
+	# Admin panel — login va parol bilan yopiq (parol: Railway Variables → ADMIN_PASSWORD)
+	@admin path /boshqaruv-k7x2.html /js/admin.js /css/admin.css
+	basic_auth @admin {
+		{$ADMIN_USER:admin} {$ADMIN_HASH}
+	}
+
 	file_server
 
 	header {
@@ -22,6 +29,6 @@
 	header @static Cache-Control "public, max-age=2592000"
 
 	# Serverga kerak bo'lmagan fayllar tashqariga chiqmasin
-	@private path /worker/* /Dockerfile /Caddyfile /.dockerignore /README.md
+	@private path /worker/* /Dockerfile /Caddyfile /start.sh /.dockerignore /README.md
 	respond @private 404
 }
