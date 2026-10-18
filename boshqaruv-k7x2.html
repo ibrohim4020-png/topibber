@@ -224,7 +224,22 @@
         <h2>Nashrdan oldin tekshiruv</h2>
         <ul class="checks" id="checks"></ul>
       </div>
+      <div class="card" id="auto-publish">
+        <h2>Bir tugma bilan chiqarish (GitHub orqali)</h2>
+        <p class="muted">O‘zgarishlar GitHub’ga yuboriladi, sayt 1–2 daqiqada o‘zi yangilanadi. Bir martalik sozlash kerak:</p>
+        <ol class="howto">
+          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → yangi token</a> sahifasini oching. Nom: <code>topibber</code>. <b>Repository access → Only select repositories</b> → <code>topibber</code>. <b>Permissions → Repository permissions → Contents → Read and write</b>. Pastdagi <b>Generate token</b> ni bosing va tokenni nusxalang.</li>
+          <li>Tokenni pastga qo‘ying. U faqat shu brauzerda saqlanadi, saytga chiqmaydi.</li>
+        </ol>
+        <div class="grid2">
+          <label class="f"><span>GitHub repozitoriy</span><input id="gh-repo" value="ibrohim4020-png/topibber" autocomplete="off" spellcheck="false"></label>
+          <label class="f"><span>GitHub token <em>github_pat_…</em></span><input id="gh-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_..."></label>
+        </div>
+        <div class="actions"><button class="btn btn-accent" id="gh-publish">Saytga chiqarish</button></div>
+        <div class="result" id="gh-result" hidden></div>
+      </div>
       <div class="card publish">
+        <h2>Yoki qo‘lda (ZIP orqali)</h2>
         <div class="pstep"><span>1</span><div><b>Ko‘rib chiqing</b><p class="muted">Qoralamani saytning o‘zida ko‘ring.</p><a class="btn btn-line" href="index.html?preview=1" target="_blank" rel="noopener">Saytda ko‘rish ↗</a></div></div>
         <div class="pstep"><span>2</span><div><b>Yangilanish faylini yuklab oling</b><p class="muted">ZIP ichida <code>js/data.js</code> va yangi rasmlar (<code>images/uploads/</code>) bor. Rasmlar alohida fayl bo‘lgani uchun sayt tez ochiladi.</p><button class="btn btn-accent" id="download-zip">yangilanish.zip ni yuklab olish</button> <button class="btn btn-ghost" id="download-js">faqat data.js</button></div></div>
         <div class="pstep"><span>3</span><div><b>Sayt papkasiga yoying</b><p class="muted">ZIP’ni sayt papkasiga yoying (mavjud fayllarni almashtiring) va papkani hostingga qayta yuklang (Netlify’da — papkani yana sudrab tashlang). Hamma qurilmada yangilanadi.</p></div></div>
