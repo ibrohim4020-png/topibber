@@ -19,6 +19,7 @@
   var defaults = { brand: {}, images: {}, contacts: {}, categories: [], products: [], gallery: [], steps: [], pricing: [], terms: [], api: { endpoint: "" }, prohibited: { list: [], keywords: [] }, text: {} };
   Object.keys(defaults).forEach(function (k) { if (D[k] == null) D[k] = clone(defaults[k]); });
   delete D.orders; // eski versiyadagi token maydoni: endi saytda saqlanmaydi
+  D.prohibited.list = (D.prohibited.list || []).map(function (s) { return String(s).replace(/\s{2,}/g, " ").trim(); }).filter(Boolean);
   while (D.steps.length < 3) D.steps.push({ title: "", text: "" });
   while (D.pricing.length < 3) D.pricing.push({ title: "", text: "" });
 
@@ -65,7 +66,12 @@
   }
   function updateState() {
     var dirty = JSON.stringify(D) !== JSON.stringify(BASE);
-    $("#draft-banner").hidden = !dirty;
+    var bar = $("#savebar");
+    bar.classList.toggle("dirty", dirty);
+    $("#savebar-text").textContent = dirty
+      ? "Saqlandi (avtomatik), lekin sayt hali eskicha. O‘zgarishlar saytda ko‘rinishi uchun uni chiqarish kerak."
+      : "✓ Hamma o‘zgarishlar saqlangan va saytdagi bilan bir xil.";
+    $("#savebar-btn").hidden = !dirty;
     var s = $("#save-state");
     s.textContent = dirty ? "Qoralama saqlandi · nashr qilinmagan" : "Saytdagi bilan bir xil";
     s.classList.toggle("dirty", dirty);
@@ -384,7 +390,7 @@
   function linesEditor(ta, path, lower) {
     ta.value = (getPath(path) || []).join("\n");
     ta.addEventListener("input", function () {
-      var arr = ta.value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+      var arr = ta.value.split("\n").map(function (s) { return s.replace(/\s{2,}/g, " ").trim(); }).filter(Boolean);
       if (lower) arr = arr.map(function (s) { return s.toLowerCase(); });
       setPath(path, arr); save(); tryBan();
     });
