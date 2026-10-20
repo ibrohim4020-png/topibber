@@ -79,20 +79,64 @@ function safeEq(a, b) {
   const x = crypto.createHash("sha256").update(String(a)).digest(), y = crypto.createHash("sha256").update(String(b)).digest();
   return crypto.timingSafeEqual(x, y);
 }
+const adminUser = () => process.env.ADMIN_USER || "admin";
+const adminToken = () => crypto.createHash("sha256").update(adminUser() + ":" + process.env.ADMIN_PASSWORD + ":tb-admin").digest("hex");
+function cookieOf(req, name) {
+  const m = (req.headers.cookie || "").split(/;\s*/).find((c) => c.startsWith(name + "="));
+  return m ? m.slice(name.length + 1) : "";
+}
 function adminOk(req) {
   const pass = process.env.ADMIN_PASSWORD;
   if (!pass) return false; // parol berilmagan — admin panel yopiq
+  if (safeEq(cookieOf(req, "tb_admin"), adminToken())) return true;
   const h = req.headers.authorization || "";
   if (!h.startsWith("Basic ")) return false;
   const [u, ...rest] = Buffer.from(h.slice(6), "base64").toString().split(":");
-  return safeEq(u, process.env.ADMIN_USER || "admin") && safeEq(rest.join(":"), pass);
+  return safeEq(u, adminUser()) && safeEq(rest.join(":"), pass);
+}
+
+/* Login sahifasi (brauzerning oddiy parol oynasi o'rniga) */
+const loginPage = (msg) => `<!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>TopibBer — kirish</title><style>
+:root{color-scheme:light dark}body{margin:0;min-height:100vh;display:grid;place-items:center;font:16px system-ui,sans-serif;background:#0f172a;color:#e2e8f0}
+form{width:min(340px,90vw);background:#1e293b;padding:28px;border-radius:16px;box-shadow:0 10px 40px #0006}
+h1{margin:0 0 18px;font-size:20px}label{display:block;margin:12px 0 4px;font-size:13px;color:#94a3b8}
+input{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:16px}
+button{margin-top:18px;width:100%;padding:12px;border:0;border-radius:10px;background:#6366f1;color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.err{margin-top:12px;color:#fca5a5;font-size:14px}</style></head><body>
+<form method="post" action="/admin-login"><h1>TopibBer · Admin</h1>
+<label for="u">Login</label><input id="u" name="user" autocomplete="username" required autofocus>
+<label for="p">Parol</label><input id="p" name="password" type="password" autocomplete="current-password" required>
+<button>Kirish</button>${msg ? '<div class="err">' + msg + "</div>" : ""}</form></body></html>`;
+
+const attempts = new Map();
+async function handleLogin(req, res) {
+  const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket.remoteAddress || "";
+  const a = attempts.get(ip) || { n: 0, ts: Date.now() };
+  if (Date.now() - a.ts > 15 * 60 * 1000) { a.n = 0; a.ts = Date.now(); }
+  if (a.n >= 10) { res.writeHead(429, { "Content-Type": "text/html; charset=utf-8" }); return res.end(loginPage("Juda ko'p urinish. 15 daqiqadan keyin qayta urining.")); }
+  let body = "";
+  try { body = (await readBody(req, 4096)).toString(); } catch (e) {}
+  const f = new URLSearchParams(body);
+  const pass = process.env.ADMIN_PASSWORD;
+  if (pass && safeEq(f.get("user") || "", adminUser()) && safeEq(f.get("password") || "", pass)) {
+    attempts.delete(ip);
+    res.writeHead(303, {
+      Location: "/boshqaruv-k7x2.html",
+      "Set-Cookie": "tb_admin=" + adminToken() + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000",
+    });
+    return res.end();
+  }
+  a.n++; attempts.set(ip, a);
+  res.writeHead(401, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(loginPage("Login yoki parol noto'g'ri."));
 }
 
 function serveStatic(req, res, pathname) {
   if (PRIVATE.test(pathname)) { res.writeHead(404); return res.end("Not found"); }
   if (ADMIN_PATHS.has(pathname) && !adminOk(req)) {
-    res.writeHead(401, { "WWW-Authenticate": 'Basic realm="TopibBer admin"' });
-    return res.end("Login kerak");
+    res.writeHead(401, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    return res.end(pathname.endsWith(".html") ? loginPage("") : "Login kerak");
   }
   let rel = decodeURIComponent(pathname);
   if (rel.endsWith("/")) rel += "index.html";
@@ -148,6 +192,7 @@ const server = http.createServer(async (req, res) => {
     const proto = (req.headers["x-forwarded-proto"] || "http").split(",")[0];
     const url = new URL(req.url, proto + "://" + (req.headers.host || "localhost"));
     if (API.has(url.pathname)) return await handleApi(req, res, url);
+    if (url.pathname === "/admin-login" && req.method === "POST") return await handleLogin(req, res);
     if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405); return res.end(); }
     serveStatic(req, res, url.pathname);
   } catch (e) {
