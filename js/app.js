@@ -327,7 +327,7 @@
 
     var file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
     var order = {
-      name: name, phone: f.phone.value, product: productName, link: link,
+      name: name, phone: f.phone.value, telegram: f.telegram.value.trim(), product: productName, link: link,
       qty: Math.max(1, parseInt(f.qty.value, 10) || 1), note: f.note.value.trim(),
       website: f.website.value, // spam tuzog‘i
     };
@@ -365,6 +365,8 @@
     var fd = new FormData();
     Object.keys(o).forEach(function (k) { fd.append(k, o[k]); });
     fd.append("sid", window.TopibTrack ? window.TopibTrack.sid : "");
+    fd.append("vid", window.TopibTrack ? window.TopibTrack.vid : "");
+    fd.append("ad", window.TopibTrack ? JSON.stringify(window.TopibTrack.attrib()) : "{}");
     if (file) fd.append("image", file);
     return fetch(ep + "/order", { method: "POST", body: fd }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
