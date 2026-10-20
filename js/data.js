@@ -94,7 +94,7 @@ window.SITE = {
      — statistika yig‘ilmaydi.
      Ulash tartibi: admin panel → Ulanish. */
   api: {
-    endpoint: "",
+    endpoint: "https://topibber-production.up.railway.app",
   },
 
   /* Taqiqlangan mahsulotlar.
