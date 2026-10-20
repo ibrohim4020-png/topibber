@@ -1,4 +1,5 @@
 .claude
 .git
 .gitignore
-worker
+data
+node_modules
